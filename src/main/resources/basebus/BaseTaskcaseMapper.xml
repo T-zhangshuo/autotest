@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zhangshuo.basebus.mapper.BaseDriverAppMapper">
+<mapper namespace="com.zhangshuo.basebus.mapper.BaseTaskCaseMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.zhangshuo.basebus.model.BaseDriverApp">
+    <resultMap id="BaseResultMap" type="com.zhangshuo.basebus.model.BaseTaskCase">
         <id column="id" property="id" />
         <result column="status" property="status" />
         <result column="create_date" property="createDate" />
         <result column="update_date" property="updateDate" />
-        <result column="app_config_id" property="appConfigId" />
-        <result column="driver_config_id" property="driverConfigId" />
+        <result column="task_id" property="taskId" />
+        <result column="name" property="name" />
+        <result column="value" property="value" />
+        <result column="cmds" property="cmds" />
+        <result column="remarks" property="remarks" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, status, create_date, update_date, app_config_id, driver_config_id
+        id, status, create_date, update_date, task_id, name, value, cmds, remarks
     </sql>
 
 </mapper>

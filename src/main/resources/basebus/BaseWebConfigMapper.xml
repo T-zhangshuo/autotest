@@ -10,11 +10,12 @@
         <result column="update_date" property="updateDate" />
         <result column="name" property="name" />
         <result column="url" property="url" />
+        <result column="user_id" property="userId" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, status, create_date, update_date, name, url
+        id, status, create_date, update_date, name, url, user_id
     </sql>
 
 </mapper>

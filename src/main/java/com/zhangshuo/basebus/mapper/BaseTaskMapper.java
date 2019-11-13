@@ -1,6 +1,6 @@
 package com.zhangshuo.basebus.mapper;
 
-import com.zhangshuo.basebus.model.BaseDriverApp;
+import com.zhangshuo.basebus.model.BaseTask;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author zhangshuo
  * @since 2019-11-13
  */
-public interface BaseDriverAppMapper extends BaseMapper<BaseDriverApp> {
+public interface BaseTaskMapper extends BaseMapper<BaseTask> {
 
 }

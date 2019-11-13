@@ -12,11 +12,12 @@
         <result column="platform_type" property="platformType" />
         <result column="device_name" property="deviceName" />
         <result column="platform_version" property="platformVersion" />
+        <result column="service_ip" property="serviceIp" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, status, create_date, update_date, user_id, platform_type, device_name, platform_version
+        id, status, create_date, update_date, user_id, platform_type, device_name, platform_version, service_ip
     </sql>
 
 </mapper>

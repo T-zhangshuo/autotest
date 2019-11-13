@@ -36,7 +36,6 @@ public class AppManager {
     public void removeDriver(@Nonnull String driverId) {
         AppiumDriver appiumDriver = driverMap.get(driverId);
         if (appiumDriver != null) {
-            appiumDriver.quit();
             driverMap.remove(driverId);
         }
     }

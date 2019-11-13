@@ -21,8 +21,8 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("driver_web")
-public class BaseDriverWeb extends Model<BaseDriverWeb> {
+@TableName("task_case")
+public class BaseTaskCase extends Model<BaseTaskCase> {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,9 +35,15 @@ public class BaseDriverWeb extends Model<BaseDriverWeb> {
 
     private LocalDateTime updateDate;
 
-    private String webConfigId;
+    private String taskId;
 
-    private String driverConfigId;
+    private String name;
+
+    private String value;
+
+    private String cmds;
+
+    private String remarks;
 
 
     @Override

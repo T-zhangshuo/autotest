@@ -1,6 +1,6 @@
 package com.zhangshuo.basebus.service;
 
-import com.zhangshuo.basebus.model.BaseDriverApp;
+import com.zhangshuo.basebus.model.BaseTask;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author zhangshuo
  * @since 2019-11-13
  */
-public interface BaseDriverAppService extends IService<BaseDriverApp> {
+public interface BaseTaskService extends IService<BaseTask> {
 
 }

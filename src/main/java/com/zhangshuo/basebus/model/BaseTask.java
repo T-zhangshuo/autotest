@@ -21,8 +21,8 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("driver_app")
-public class BaseDriverApp extends Model<BaseDriverApp> {
+@TableName("task")
+public class BaseTask extends Model<BaseTask> {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,9 +35,11 @@ public class BaseDriverApp extends Model<BaseDriverApp> {
 
     private LocalDateTime updateDate;
 
-    private String appConfigId;
+    private String userId;
 
-    private String driverConfigId;
+    private String name;
+
+    private String remarks;
 
 
     @Override

@@ -43,6 +43,8 @@ public class BaseAppConfig extends Model<BaseAppConfig> {
 
     private String appWaitactivity;
 
+    private String userId;
+
 
     @Override
     protected Serializable pkVal() {

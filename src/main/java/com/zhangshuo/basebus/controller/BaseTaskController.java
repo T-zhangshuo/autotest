@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
  * @since 2019-11-13
  */
 @RestController
-@RequestMapping("/baseDriverApp")
-public class BaseDriverAppController {
+@RequestMapping("/baseTask")
+public class BaseTaskController {
 
 }
 

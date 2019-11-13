@@ -15,13 +15,30 @@ public class DriverConfigServiceImpl extends BaseDriverConfigServiceImpl impleme
     private BaseDriverConfigMapper baseDriverConfigMapper;
 
     @Override
-    public boolean addDriverConfig(String userId, String name, String type, String version) {
+    public boolean addDriverConfig(String userId, String name, String type, String version,String serviceIp) {
         BaseDriverConfig driverConfig = new BaseDriverConfig();
         driverConfig.setId(AutoIdUtils.get().nextId());
         driverConfig.setUserId(userId);
         driverConfig.setDeviceName(name);
         driverConfig.setPlatformType(type);
         driverConfig.setPlatformVersion(version);
+        driverConfig.setServiceIp(serviceIp);
         return baseDriverConfigMapper.insert(driverConfig) > 0;
+    }
+
+    @Override
+    public boolean delDriverConfig(String id) {
+        return baseDriverConfigMapper.deleteById(id) > 0;
+    }
+
+    @Override
+    public boolean updateDriverConfig(String id, String name, String type, String version,String serviceIp) {
+        BaseDriverConfig driverConfig = new BaseDriverConfig();
+        driverConfig.setId(id);
+        driverConfig.setDeviceName(name);
+        driverConfig.setPlatformType(type);
+        driverConfig.setPlatformVersion(version);
+        driverConfig.setServiceIp(serviceIp);
+        return baseDriverConfigMapper.updateById(driverConfig) > 0;
     }
 }

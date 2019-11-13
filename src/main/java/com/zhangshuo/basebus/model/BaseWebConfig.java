@@ -39,6 +39,8 @@ public class BaseWebConfig extends Model<BaseWebConfig> {
 
     private String url;
 
+    private String userId;
+
 
     @Override
     protected Serializable pkVal() {

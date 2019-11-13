@@ -46,6 +46,8 @@ public class BaseDriverConfig extends Model<BaseDriverConfig> {
 
     private String platformVersion;
 
+    private String serviceIp;
+
 
     @Override
     protected Serializable pkVal() {
