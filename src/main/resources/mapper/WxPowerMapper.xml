@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangshuo.autotest.mapper.PowerMapper">
+
+    <select id="findPowerByRoleId" resultType="com.zhangshuo.basebus.model.BasePower">
+        SELECT power.* from power
+        INNER JOIN role_power
+        on
+        role_power.power_id=power.id
+        and role_power.status='1'
+        and role_power.role_id=#{roleId}
+    </select>
+</mapper>

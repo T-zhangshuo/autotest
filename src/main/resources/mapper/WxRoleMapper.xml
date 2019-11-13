@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangshuo.autotest.mapper.RoleMapper">
+
+    <select id="findByUserId" resultType="com.zhangshuo.basebus.model.BaseRole">
+        SELECT role.* FROM role
+        INNER JOIN user_role on user_role.role_id=role.id and user_role.user_id=#{userId}
+        WHERE role.status &lt;&gt; '0'
+    </select>
+
+    <select id="findAllRole" resultType="com.zhangshuo.basebus.model.BaseRole">
+         SELECT role.* FROM role WHERE role.status &lt;&gt; '0'
+    </select>
+</mapper>
