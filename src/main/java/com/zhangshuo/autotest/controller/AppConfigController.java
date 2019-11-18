@@ -4,14 +4,16 @@ import com.zhangshuo.autotest.model.RestApi;
 import com.zhangshuo.autotest.model.Token;
 import com.zhangshuo.autotest.service.AppConfigService;
 import com.zhangshuo.autotest.utils.DataConfig;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+@Api("APP配置")
 @RequestMapping("/app/config")
 @RestController
 public class AppConfigController {
@@ -19,11 +21,18 @@ public class AppConfigController {
     @Autowired
     private AppConfigService appConfigService;
 
-    @RequestMapping(value = "/add.json", method = RequestMethod.POST)
+    @ApiOperation(value = "新增APP信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "name", value = "APP名称", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "apppkg", value = "Android包名，IOS是APP的地址", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "appact", value = "Android启动的Activity名称，IOS是UUID", required = true, dataType = "String"),
+            @ApiImplicitParam(name = "appwaitact", value = "Android启动后等待Activity名称，IOS是测试工具名称", required = true, dataType = "String"),
+    })
+    @PostMapping(value = "/add.json")
     public RestApi<Boolean> add(String name, String apppkg, String appact, String appwaitact, HttpServletRequest request) {
         RestApi<Boolean> restApi = new RestApi<>();
         Token userToken = DataConfig.getUserToken(request);
-        restApi.setData(appConfigService.addConfig(userToken.getId(),name, apppkg, appact, appwaitact));
+        restApi.setData(appConfigService.addConfig(userToken.getId(), name, apppkg, appact, appwaitact));
         return restApi;
     }
 

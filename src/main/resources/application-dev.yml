@@ -5,3 +5,8 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/auto_data?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&allowMultiQueries=true&serverTimezone=GMT%2B8&allowMutiQueries=true
     username: root
     password: root123456
+
+server:
+  port: 8083
+  servlet:
+    context-path: /api

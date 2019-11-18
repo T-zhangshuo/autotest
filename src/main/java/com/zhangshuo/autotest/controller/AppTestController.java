@@ -2,19 +2,25 @@ package com.zhangshuo.autotest.controller;
 
 import com.zhangshuo.autotest.appium.AppAction;
 import com.zhangshuo.autotest.appium.AppManager;
+import com.zhangshuo.autotest.appium.IDoAppAction;
+import com.zhangshuo.autotest.appium.actions.Actions;
+import com.zhangshuo.autotest.enums.EDriverType;
 import com.zhangshuo.autotest.model.RestApi;
 import com.zhangshuo.autotest.service.AppConfigService;
 import com.zhangshuo.autotest.service.DriverConfigService;
 import com.zhangshuo.autotest.service.TaskCaseService;
+import com.zhangshuo.autotest.service.WebSocketServer;
+import com.zhangshuo.autotest.utils.StringUtils;
 import com.zhangshuo.basebus.model.BaseAppConfig;
 import com.zhangshuo.basebus.model.BaseDriverConfig;
 import com.zhangshuo.basebus.model.BaseTaskCase;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.AnnotationUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.util.TextUtils;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -43,16 +49,13 @@ public class AppTestController {
     private AppConfigService appConfigService;
     @Autowired
     private TaskCaseService taskCaseService;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
-    @RequestMapping("/connect.json")
-    public RestApi<String> connect(String driverId, String appId, String type) {
+
+    @RequestMapping("/connectTest.json")
+    public RestApi<String> connectTest(String driverId, String appId) {
         RestApi<String> restApi = new RestApi<>();
-        if (!"Android".equalsIgnoreCase(type) &&
-                !"IOS".equalsIgnoreCase(type)) {
-            restApi.setMsg("连接类型错误～");
-            return restApi;
-        }
-
         BaseDriverConfig driverConfig = driverConfigService.getById(driverId);
         BaseAppConfig appConfig = appConfigService.getById(appId);
         if (driverConfig == null) {
@@ -64,31 +67,30 @@ public class AppTestController {
             return restApi;
         }
 
-        DesiredCapabilities cap = new DesiredCapabilities();
-        cap.setCapability("platformName", type); //指定测试平台
-        cap.setCapability("deviceName", driverConfig.getDeviceName()); //指定测试机的ID,通过adb命令`adb devices`获取
-        cap.setCapability("platformVersion", driverConfig.getPlatformVersion());
-
-        cap.setCapability("appPackage", appConfig.getAppPackage());
-        cap.setCapability("appActivity", appConfig.getAppActivity());
-
-        cap.setCapability("appWaitActivity", appConfig.getAppWaitactivity());
-        //每次启动时覆盖session，否则第二次后运行会报错不能新建session
-        cap.setCapability("sessionOverride", true);
         String url = "http://" + driverConfig.getServiceIp() + "/wd/hub";
         try {
-            AndroidDriver driver = new AndroidDriver(new URL(url), cap);
-            appManager.addDriver(driverId, driver);
+            String driverType = driverConfig.getPlatformType();
+            if (driverType.equalsIgnoreCase(EDriverType.Android.toString())) {
+                AndroidDriver driver = new AndroidDriver(new URL(url), appManager.getAndroidCap(driverConfig, appConfig));
+                appManager.addDriver(driverId, driver);
+            } else if (driverType.equalsIgnoreCase(EDriverType.IOS.toString())) {
+                IOSDriver driver = new IOSDriver(new URL(url), appManager.getIosCap(driverConfig, appConfig));
+                appManager.addDriver(driverId, driver);
+            }
             restApi.setData("连接成功～");
         } catch (Exception e) {
-            restApi.setMsg("连接失败 <br/>>>: 配置信息: " + cap.toString() + " <br/>>>: 远程地址: " + url + " <br/>>>: 错误信息: " + e.getLocalizedMessage());
+            restApi.setMsg("连接失败 \n>>: 远程地址: " + url + " \n>>: 错误信息: " + e.getLocalizedMessage());
         }
         return restApi;
     }
 
     @RequestMapping("/excuteCase.json")
-    public RestApi<String> excuteCase(String caseId, String driverId) {
-        RestApi<String> restApi = new RestApi<>();
+    public RestApi<String> excuteCase(String driverId, String appId, String caseId) throws Exception {
+        webSocketServer.sendMessage(driverId, "开始连接设备～");
+        RestApi<String> restApi = connectTest(driverId, appId);
+        if (!restApi.isOpt()) {
+            return restApi;
+        }
         BaseTaskCase taskCase = taskCaseService.getById(caseId);
         if (taskCase == null) {
             restApi.setMsg("执行失败～ 未找到测试用例");
@@ -99,25 +101,21 @@ public class AppTestController {
             restApi.setMsg("执行失败～ 该测试用例无执行脚本");
             return restApi;
         }
-        //[findElementById](com.android.calculator2:id/digit1)[click]()
         String[] cmdArray = cmds.split(",");
         if (cmdArray.length == 0) {
             restApi.setMsg("执行失败～ 该测试用例无执行脚本");
             return restApi;
         }
         List<AppAction> appActionList = new ArrayList<>();
-        StringBuilder cmdTipBuilder = new StringBuilder();
-        cmdTipBuilder.append("<br/>命令提示: " + cmds);
+        webSocketServer.sendMessage(driverId, "开始解析测试任务～");
         for (int i = 0; i < cmdArray.length; i++) {
             String cmd = cmdArray[i];
+            webSocketServer.sendMessage(driverId, " 正在解析任务(" + (i + 1) + "/" + cmdArray.length + "):  " + cmd);
             String[] cmdtmp = cmd.split("\\|");
             if (cmdtmp.length != 3) {
-                cmdTipBuilder.append("<br/>错误: " + cmd + " 命令格式未满足要求!忽略此命令～");
-                continue;
-            }
-            if ("findElements".equalsIgnoreCase(cmdtmp[0])) {
-                cmdTipBuilder.append("<br/>提示: " + cmd + " 命令不支持!忽略此命令～");
-                continue;
+                webSocketServer.sendMessage(driverId, "错误: 任务格式未满足要求～ (" + cmd + ")");
+                restApi.setMsg("执行失败～ 该测试用例存在格式错误的任务!");
+                return restApi;
             }
             AppAction appAction = new AppAction();
             appAction.setFindway(cmdtmp[0]);
@@ -125,32 +123,25 @@ public class AppTestController {
             appAction.setAction(cmdtmp[2]);
             appActionList.add(appAction);
         }
+        webSocketServer.sendMessage(driverId, "开始执行测试任务～");
         if (appActionList.size() > 0) {
-            AppiumDriver driver = appManager.getDriver(driverId);
-            if(driver==null){
-                restApi.setMsg("未找到已连接设备～");
+            AppiumDriver driver = (AppiumDriver) appManager.getDriver(driverId);
+            if (driver == null) {
+                restApi.setMsg("执行失败～ 未找到已连接设备");
                 return restApi;
             }
             for (AppAction appAction : appActionList) {
-                //TODO 待优化
-                cmdTipBuilder.append("<br/>开始执行: " + appAction.getFindway() + " | " + appAction.getValue() + " | " + appAction.getAction());
-                switch (appAction.getFindway()) {
-                    case "findElementById":
-                        WebElement elementById = driver.findElementById(appAction.getAction());
-                        switch (appAction.getAction()) {
-                            case "click":
-                                elementById.click();
-                                cmdTipBuilder.append("<br/>结束执行: 成功");
-                                break;
-                        }
-                        break;
+                webSocketServer.sendMessage(driverId, "正在执行任务:  " + appAction.toString());
+                try {
+                    Object result = Actions.doAction(driver, appAction);
+                    webSocketServer.sendMessage(driverId, "执行结束:  已完成任务! " + (result != null ? result.toString() : ""));
+                } catch (Exception e) {
+                    webSocketServer.sendMessage(driverId, "执行结束:  任务失败～");
+                    break;
                 }
-                cmdTipBuilder.append("<br/>结束执行: 失败");
             }
-        } else {
-            cmdTipBuilder.append("<br/>无满足命令条件～");
+
         }
-        restApi.setData(cmdTipBuilder.toString());
         return restApi;
     }
 }
